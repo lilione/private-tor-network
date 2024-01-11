@@ -1,3 +1,7 @@
-./tor/*
+*tor/*
 ./*.sh
+.idea/
+*.manifest
+*.sgx
+*.sig
 

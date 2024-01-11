@@ -13,8 +13,9 @@
 #   
 #   docker run --rm -it -e ROLE=DA antitree/tor-server /bin/bash
 
-FROM debian:jessie
-MAINTAINER Antitree antitree@protonmail.com
+#FROM debian:jessie
+#MAINTAINER Antitree antitree@protonmail.com
+FROM gramineproject/gramine:v1.5
 
 # Sets which version of tor to use. See the Tor Projects git page for available tags
 # Examples:
@@ -22,7 +23,7 @@ MAINTAINER Antitree antitree@protonmail.com
 #  * tor-0.2.7.6
 #  * tor-0.2.7.5
 #  * release-0.2.1
-ENV TOR_VER="release-0.3.5"
+ENV TOR_VER="release-0.3.4"
 #ENV TOR_VER="master"
 # NOTE sometimes the master branch doesn't compile so I'm sticking with the release
 #  feel free to change this to master to get the latest and greatest
@@ -75,4 +76,19 @@ EXPOSE 9001 9030 9051
 
 ENTRYPOINT ["docker-entrypoint"]
 
-CMD ["tor", "-f", "/etc/tor/torrc"]
+RUN apt-get update && apt-get install -y \
+    make \
+    vim
+
+RUN gramine-sgx-gen-private-key
+
+RUN mkdir /usr/local/var
+
+WORKDIR /private-tor-network
+ADD ./Makefile /private-tor-network/Makefile
+ADD ./tor.manifest.template /private-tor-network/tor.manifest.template
+RUN make clean & make
+
+#CMD ["tor", "-f", "/etc/tor/torrc"]
+CMD ["gramine-sgx", "tor"]
+#CMD ["tail", "-F", "anything"]
