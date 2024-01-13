@@ -64,8 +64,6 @@ services:
         # Setups a listener on host machine
         - "9050:9050"
         - "9051:9051"
-      security_opt:
-        - seccomp:unconfined
       volumes:
         - ./tor:/tor
         - aesmd-socket:/var/run/aesmd

@@ -1,7 +1,7 @@
 ################################# CONSTANTS ###################################
 
 THIS_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
-ARCH_LIBDIR ?= /lib/x86_64-linux-gnu$(shell $(CC) -dumpmachine)
+ARCH_LIBDIR ?= /lib/$(shell $(CC) -dumpmachine)
 ENTRYPOINT ?= /usr/local/bin/tor
 
 ifeq ($(DEBUG),1)
