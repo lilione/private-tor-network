@@ -1,15 +1,14 @@
 import io
+import pycurl
+import stem.control
 import time
 
-import pycurl
-
-import stem.control
-
-# Static exit for us to make 2-hop circuits through.
-EXIT_FINGERPRINT = '81AEB12FA0994B5937D2A6395C45B08F8AC05BF4'
+from utils import sample
 
 SOCKS_PORT = 9050
 CONNECTION_TIMEOUT = 30  # timeout before we give up on a circuit
+
+hops = 3
 
 
 def query(url):
@@ -63,16 +62,26 @@ def scan(controller, path):
         controller.reset_conf('__LeaveStreamsUnattached')
 
 
+def trial():
+    path = []
+
+    for _ in range(hops - 1):
+        path.append(sample(relay_fingerprints))
+
+    path.append(sample(exit_fingerprints))
+
+    try:
+        time_taken = scan(controller, path)
+        print('%s => %0.2f seconds' % (str(path), time_taken))
+    except Exception as exc:
+        print('%s => %s' % (str(path), exc))
+
+
 if __name__ == "__main__":
     with stem.control.Controller.from_port(port=9051) as controller:
         controller.authenticate('password')
 
+        exit_fingerprints = [desc.fingerprint for desc in controller.get_network_statuses() if desc.nickname[:4] == 'EXIT']
         relay_fingerprints = [desc.fingerprint for desc in controller.get_network_statuses() if desc.nickname[:5] == 'RELAY']
 
-        for relay_fingerprint in relay_fingerprints:
-            print(relay_fingerprint)
-            try:
-                time_taken = scan(controller, [relay_fingerprint, EXIT_FINGERPRINT])
-                print('%s => %0.2f seconds' % (relay_fingerprint, time_taken))
-            except Exception as exc:
-                print('%s => %s' % (relay_fingerprint, exc))
+        trial()

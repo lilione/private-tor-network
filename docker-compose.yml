@@ -36,6 +36,8 @@ services:
       #expose:
       #  - "7000"
       #  - "9030"
+      deploy:
+        replicas: 5
       environment:
         ROLE: RELAY
       volumes:
@@ -52,6 +54,8 @@ services:
       #  - "9030"
       environment:
         ROLE: EXIT
+      deploy:
+        replicas: 3
       volumes:
         - ./tor:/tor
       depends_on:
