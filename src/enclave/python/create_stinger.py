@@ -3,12 +3,15 @@ import pycurl
 import stem.control
 import time
 
-from utils import sample
+from utils import *
+
 
 SOCKS_PORT = 9050
 CONNECTION_TIMEOUT = 30  # timeout before we give up on a circuit
 
 hops = 3
+
+web_replicas = 10
 
 
 def query(url):
@@ -30,7 +33,7 @@ def query(url):
         query.perform()
         return output.getvalue()
     except pycurl.error as exc:
-        raise ValueError("Unable to reach %s (%s)" % (url, exc))
+        raise ValueError('Unable to reach %s (%s)' % (url, exc))
 
 
 def scan(controller, path):
@@ -50,11 +53,11 @@ def scan(controller, path):
         controller.set_conf('__LeaveStreamsUnattached', '1')  # leave stream management to us
         start_time = time.time()
 
-        check_page = query('web:80')
+        target_service = f'private-tor-network-web-{sample(web_replicas) + 1}'
+        print(f'target_service {target_service}')
+        check_page = query(f'{target_service}:80')
+        open(f'{data_dir}/stinger', 'w').write(f'{target_service}\n')
         print(check_page)
-
-        # if 'Congratulations. This browser is configured to use Tor.' not in check_page:
-        #     raise ValueError("Request didn't have the right content")
 
         return time.time() - start_time
     finally:
@@ -66,9 +69,9 @@ def trial():
     path = []
 
     for _ in range(hops - 1):
-        path.append(sample(relay_fingerprints))
+        path.append(sample_list(relay_fingerprints))
 
-    path.append(sample(exit_fingerprints))
+    path.append(sample_list(exit_fingerprints))
 
     try:
         time_taken = scan(controller, path)
@@ -77,7 +80,8 @@ def trial():
         print('%s => %s' % (str(path), exc))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
+
     with stem.control.Controller.from_port(port=9051) as controller:
         controller.authenticate('password')
 

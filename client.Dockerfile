@@ -44,18 +44,32 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install $build_deps $build_temps \
         init-system-helpers \
         pwgen && \
-    mkdir /src && \
-    cd /src && \
-    git clone https://git.torproject.org/tor.git && \
+    mkdir /src
+
+RUN apt-get update && apt-get install -y \
+    make \
+    vim \
+    iproute2
+
+ENV PYTHONUNBUFFERED 1
+RUN apt-get update && apt-get install -y python3-pip
+
+RUN apt-get update && apt-get install -y \
+    libcurl4-openssl-dev \
+    libssl-dev
+
+WORKDIR /
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+COPY src/tor /src/tor
+
+RUN cd /src && \
     cd tor && \
-    git checkout ${TOR_VER} && \
     ./autogen.sh && \
     ./configure --disable-asciidoc && \
     make && \
-    make install && \
-    apt-get -y purge --auto-remove $build_temps && \
-    apt-get clean && rm -r /var/lib/apt/lists/* && \
-    rm -rf /src/*
+    make install
 
 # Copy the base tor configuration file
 COPY ./config/torrc* /etc/tor/
@@ -74,21 +88,16 @@ RUN mkdir ${TOR_DIR}
 # TODO is this necessary anymore?
 EXPOSE 9001 9030 9051
 
-ENTRYPOINT ["docker-entrypoint"]
-
-RUN apt-get update && apt-get install -y \
-    make \
-    vim
-
 RUN gramine-sgx-gen-private-key
-
 RUN mkdir /usr/local/var
 
-WORKDIR /private-tor-network
-ADD ./Makefile /private-tor-network/Makefile
-ADD ./tor.manifest.template /private-tor-network/tor.manifest.template
-RUN make clean & make
+WORKDIR /private-tor-network/src
+RUN mkdir -p input_data output_data enclave_data
+
+ADD ./src/ /private-tor-network/src
+
+ENTRYPOINT ["docker-entrypoint"]
 
 #CMD ["tor", "-f", "/etc/tor/torrc"]
-CMD ["gramine-sgx", "tor"]
+CMD ["bash", "/private-tor-network/src/enclave/run_tor_client.sh"]
 #CMD ["tail", "-F", "anything"]

@@ -27,8 +27,8 @@ endif
 tor.manifest: tor.manifest.template
 	gramine-manifest \
 		-Dlog_level=$(GRAMINE_LOG_LEVEL) \
-		-Dentrypoint=$(ENTRYPOINT) \
 		-Darch_libdir=$(ARCH_LIBDIR) \
+		-Dentrypoint=$(ENTRYPOINT) \
 		-Dra_type=$(RA_TYPE) \
 		-Dra_client_spid=$(RA_CLIENT_SPID) \
 		-Dra_client_linkable=$(RA_CLIENT_LINKABLE) \
@@ -72,7 +72,7 @@ check: all
 
 .PHONY: clean
 clean:
-	$(RM) *.token *.sig *.manifest.sgx *.manifest tor.o tor OUTPUT
+	$(RM) *.token *.sig *.manifest.sgx *.manifest tor.o OUTPUT
 
 .PHONY: distclean
 distclean: clean

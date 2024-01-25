@@ -1,0 +1,5 @@
+eth-abi==2.2.0
+eth-utils==1.9.5
+web3==5.31.4
+pycurl==7.45.2
+stem==1.8.2

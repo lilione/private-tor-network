@@ -1,4 +1,3 @@
-*tor/*
 ./*.sh
 .idea/
 *.manifest
@@ -6,3 +5,9 @@
 *.sig
 .env
 *__pycache__
+poa/data/*
+*enclave_data/
+*output_data/
+/tor
+src/tor
+*input_data/

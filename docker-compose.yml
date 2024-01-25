@@ -1,6 +1,7 @@
 version: '3.9'
 
 services:
+
   da1:
       image: antitree/private-tor:0.3.4
       #expose:
@@ -11,6 +12,7 @@ services:
       volumes:
         ## Needed to keep track of other nodes
         - ./tor:/tor
+
   da2:
       image: antitree/private-tor:0.3.4
       #expose:
@@ -21,6 +23,7 @@ services:
       volumes:
         ## Needed to keep track of other nodes
         - ./tor:/tor
+
   da3:
       image: antitree/private-tor:0.3.4
       #expose:
@@ -31,8 +34,11 @@ services:
       volumes:
         ## Needed to keep track of other nodes
         - ./tor:/tor
+
   relay:
-      image: antitree/private-tor:0.3.4
+      build:
+        context: ./
+        dockerfile: node.Dockerfile
       #expose:
       #  - "7000"
       #  - "9030"
@@ -47,8 +53,11 @@ services:
         - da1
         - da2
         - da3
+
   exit:
-      image: antitree/private-tor:0.3.4
+      build:
+        context: ./
+        dockerfile: node.Dockerfile
       #expose:
       #  - "7000"
       #  - "9030"
@@ -63,6 +72,7 @@ services:
         - da1
         - da2
         - da3
+
   client:
       ports:
         # Setups a listener on host machine
@@ -72,6 +82,7 @@ services:
         - ./tor:/tor
         - aesmd-socket:/var/run/aesmd
         - ./:/private-tor-network
+        - data:/data
       environment:
         ROLE: CLIENT
       depends_on:
@@ -81,34 +92,40 @@ services:
         - da3
       build:
         context: ./
-        dockerfile: Dockerfile
+        dockerfile: client.Dockerfile
       env_file: .env
+      working_dir: /private-tor-network/src/enclave/python
       extends:
         file: sgx-driver.yml
         service: ${SGX_DRIVER}-enclave-devices
-  hs:
-      image: antitree/private-tor:0.3.4
-      #expose:
-      #  - "80"
-      environment:
-        ROLE: HS
-        # This will create a hidden service that points to
-        # the service "web" which is runing nginx. You can
-        # change this to whatever ip or hostname you want
-        TOR_HS_PORT: "80"
-        TOR_HS_ADDR: "web"
-      volumes:
-        - ./tor:/tor
-      depends_on:
-        - da1
-        - da2
-        - da3
-      links:
-        - web
+
+#  hs:
+#      image: antitree/private-tor:0.3.4
+#      #expose:
+#      #  - "80"
+#      environment:
+#        ROLE: HS
+#        # This will create a hidden service that points to
+#        # the service "web" which is runing nginx. You can
+#        # change this to whatever ip or hostname you want
+#        TOR_HS_PORT: "80"
+#        TOR_HS_ADDR: "web"
+#      volumes:
+#        - ./tor:/tor
+#      depends_on:
+#        - da1
+#        - da2
+#        - da3
+#      links:
+#        - web
+
   web:
       image: nginx
       #expose:
       #  - "80"
+      deploy:
+        replicas: 10
+
   aesmd:
       image: ghcr.io/initc3/sgx-aesm:2.19-buster-81eb0d3
       volumes:
@@ -119,7 +136,24 @@ services:
         file: sgx-driver.yml
         service: ${SGX_DRIVER}-aesmd-devices
 
+  ethnode:
+    image: ethereum/client-go:alltools-stable
+    environment:
+      POADIR: /opt/poa
+      DATADIR: /opt/poa/data
+      KEYSTORE: /opt/poa/keystore/admin
+    ports:
+      - "8545:8545"
+      - "8546:8546"
+    volumes:
+      - ./poa/chain-latest.sh:/usr/src/chain-latest.sh
+      - ./poa:/opt/poa
+    working_dir: /usr/src/
+    entrypoint: sh chain-latest.sh
+
+
 volumes:
+  data:
   aesmd-socket:
     driver: local
     driver_opts:
