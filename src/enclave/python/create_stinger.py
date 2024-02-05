@@ -3,7 +3,7 @@ import pycurl
 import stem.control
 import time
 
-from utils import *
+from enclave.python.utils import *
 
 
 SOCKS_PORT = 9050
@@ -13,6 +13,7 @@ hops = 3
 
 web_replicas = 10
 
+rep = 5
 
 def query(url):
     """
@@ -56,7 +57,7 @@ def scan(controller, path):
         target_service = f'private-tor-network-web-{sample(web_replicas) + 1}'
         print(f'target_service {target_service}')
         check_page = query(f'{target_service}:80')
-        open(f'{data_dir}/stinger', 'w').write(f'{target_service}\n')
+
         print(check_page)
 
         return time.time() - start_time
@@ -75,6 +76,8 @@ def trial():
 
     try:
         time_taken = scan(controller, path)
+        global cnt
+        cnt += 1
         print('%s => %0.2f seconds' % (str(path), time_taken))
     except Exception as exc:
         print('%s => %s' % (str(path), exc))
@@ -85,7 +88,12 @@ if __name__ == '__main__':
     with stem.control.Controller.from_port(port=9051) as controller:
         controller.authenticate('password')
 
-        exit_fingerprints = [desc.fingerprint for desc in controller.get_network_statuses() if desc.nickname[:4] == 'EXIT']
-        relay_fingerprints = [desc.fingerprint for desc in controller.get_network_statuses() if desc.nickname[:5] == 'RELAY']
+        cnt = 0
+        while cnt < rep:
+            print(cnt, rep)
+            exit_fingerprints = [desc.fingerprint for desc in controller.get_network_statuses() if desc.nickname[:4] == 'EXIT']
+            relay_fingerprints = [desc.fingerprint for desc in controller.get_network_statuses() if desc.nickname[:5] == 'RELAY']
 
-        trial()
+            trial()
+
+            time.sleep(3)

@@ -91,13 +91,11 @@ EXPOSE 9001 9030 9051
 RUN gramine-sgx-gen-private-key
 RUN mkdir /usr/local/var
 
-WORKDIR /private-tor-network/src
-RUN mkdir -p input_data output_data enclave_data
-
 ADD ./src/ /private-tor-network/src
+
+WORKDIR /private-tor-network/data
+RUN mkdir enclave
 
 ENTRYPOINT ["docker-entrypoint"]
 
-#CMD ["tor", "-f", "/etc/tor/torrc"]
 CMD ["bash", "/private-tor-network/src/enclave/run_tor_client.sh"]
-#CMD ["tail", "-F", "anything"]

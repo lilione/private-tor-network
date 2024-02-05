@@ -11,3 +11,5 @@ poa/data/*
 /tor
 src/tor
 *input_data/
+*.log
+data/*

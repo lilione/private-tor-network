@@ -1,0 +1,142 @@
+version: '3.9'
+
+services:
+
+  da1:
+      image: antitree/private-tor:0.3.4
+      #expose:
+      #  - "7000"
+      #  - "9030"
+      environment:
+        ROLE: DA
+      volumes:
+        ## Needed to keep track of other nodes
+        - ./tor:/tor
+
+  da2:
+      image: antitree/private-tor:0.3.4
+      #expose:
+      #  - "7000"
+      #  - "9030"
+      environment:
+        ROLE: DA
+      volumes:
+        ## Needed to keep track of other nodes
+        - ./tor:/tor
+
+  da3:
+      image: antitree/private-tor:0.3.4
+      #expose:
+      #  - "7000"
+      #  - "9030"
+      environment:
+        ROLE: DA
+      volumes:
+        ## Needed to keep track of other nodes
+        - ./tor:/tor
+
+  relay:
+      build:
+        context: ./
+        dockerfile: node.Dockerfile
+      #expose:
+      #  - "7000"
+      #  - "9030"
+      deploy:
+        replicas: 5
+      environment:
+        ROLE: RELAY
+      volumes:
+        - ./tor:/tor
+      depends_on:
+        # Make sure the DA's are already up
+        - da1
+        - da2
+        - da3
+
+  exit:
+      build:
+        context: ./
+        dockerfile: node.Dockerfile
+      #expose:
+      #  - "7000"
+      #  - "9030"
+      environment:
+        ROLE: EXIT
+      deploy:
+        replicas: 3
+      volumes:
+        - ./tor:/tor
+        - ./data:/private-tor-network/data
+      depends_on:
+        # Make sure the DA's are already up
+        - da1
+        - da2
+        - da3
+
+  client:
+      ports:
+        # Setups a listener on host machine
+        - "9050:9050"
+        - "9051:9051"
+      volumes:
+        - ./tor:/tor
+        - ./:/private-tor-network
+        - ./data:/private-tor-network/data
+      environment:
+        ROLE: CLIENT
+        SGX: -1
+      depends_on:
+        - da1
+        - da2
+        - da3
+      build:
+        context: ./
+        dockerfile: client.Dockerfile
+      working_dir: /private-tor-network/src/
+#      command: sleep infinity
+      command: tor -f /etc/tor/torrc
+
+#  hs:
+#      image: antitree/private-tor:0.3.4
+#      #expose:
+#      #  - "80"
+#      environment:
+#        ROLE: HS
+#        # This will create a hidden service that points to
+#        # the service "web" which is runing nginx. You can
+#        # change this to whatever ip or hostname you want
+#        TOR_HS_PORT: "80"
+#        TOR_HS_ADDR: "web"
+#      volumes:
+#        - ./tor:/tor
+#      depends_on:
+#        - da1
+#        - da2
+#        - da3
+#      links:
+#        - web
+
+  web:
+      image: nginx
+      #expose:
+      #  - "80"
+      deploy:
+        replicas: 10
+
+  ethnode:
+    image: ethereum/client-go:alltools-stable
+    environment:
+      POADIR: /opt/poa
+      DATADIR: /opt/poa/data
+      KEYSTORE: /opt/poa/keystore/admin
+    ports:
+      - "8545:8545"
+      - "8546:8546"
+    volumes:
+      - ./poa/chain-latest.sh:/usr/src/chain-latest.sh
+      - ./poa:/opt/poa
+    working_dir: /usr/src/
+    entrypoint: sh chain-latest.sh
+
+

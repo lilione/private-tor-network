@@ -1,10 +1,14 @@
 ### Prepare modified tor library
 ```bash
+git checkout lilione
 cd src
-git pull https://github.com/lilione/tor.git
+git clone https://github.com/lilione/tor.git
+cd tor
+git checkout sting
 ```
 
 ### Start Service
+At root directory
 ```bash
 docker compose up -d
 ```

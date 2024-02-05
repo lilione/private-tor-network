@@ -1,6 +1,6 @@
 import os
 
-from utils import *
+from enclave.python.utils import *
 
 
 def gen_signingKey(w3):
