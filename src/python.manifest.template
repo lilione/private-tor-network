@@ -41,9 +41,7 @@ fs.mounts = [
 
   { type = "tmpfs", path = "/tmp" },
 
-  { path = "/input", uri = "file:/private-tor-network/src/input_data"},
-  { path = "/output", uri = "file:/private-tor-network/src/output_data"},
-  { type = "encrypted", path = "/data/", uri = "file:/private-tor-network/src/enclave_data/", key_name = "_sgx_mrenclave" },
+  { path = "/private-tor-network/data/", uri = "file:/private-tor-network/data/" },
 
 ]
 
@@ -75,11 +73,11 @@ sgx.trusted_files = [
 
   "file:./",
 
+
+  "file:/private-tor-network/data/",
 ]
 
 sgx.allowed_files = [
-  "file:/private-tor-network/src/output_data",
-  "file:/private-tor-network/src/input_data",
   "file:/etc/nsswitch.conf",
   "file:/etc/host.conf",
   "file:/etc/ethers",
@@ -89,4 +87,6 @@ sgx.allowed_files = [
   "file:/etc/gai.conf",
   "file:/etc/ssl/certs/ca-certificates.crt",
   "file:/etc/sgx_default_qcnl.conf",
+
+  "file:/private-tor-network/data/",
 ]

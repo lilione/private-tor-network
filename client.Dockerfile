@@ -93,9 +93,6 @@ RUN mkdir /usr/local/var
 
 ADD ./src/ /private-tor-network/src
 
-WORKDIR /private-tor-network/data
-RUN mkdir enclave
-
 ENTRYPOINT ["docker-entrypoint"]
 
-CMD ["bash", "/private-tor-network/src/enclave/run_tor_client.sh"]
+CMD ["bash", "/private-tor-network/src/run_tor_client.sh"]

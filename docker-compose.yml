@@ -67,6 +67,7 @@ services:
         replicas: 3
       volumes:
         - ./tor:/tor
+        - ./data:/private-tor-network/data
       depends_on:
         # Make sure the DA's are already up
         - da1
@@ -82,7 +83,9 @@ services:
         - ./tor:/tor
         - aesmd-socket:/var/run/aesmd
         - ./:/private-tor-network
-        - data:/data
+        - ./data/enclave:/private-tor-network/data/enclave
+        - ./data/input:/private-tor-network/data/input
+        - ./data/output:/private-tor-network/data/output
       environment:
         ROLE: CLIENT
       depends_on:
@@ -94,10 +97,11 @@ services:
         context: ./
         dockerfile: client.Dockerfile
       env_file: .env
-      working_dir: /private-tor-network/src/enclave/python
+      working_dir: /private-tor-network/src
       extends:
         file: sgx-driver.yml
         service: ${SGX_DRIVER}-enclave-devices
+#      command: sleep infinity
 
 #  hs:
 #      image: antitree/private-tor:0.3.4
@@ -153,7 +157,6 @@ services:
 
 
 volumes:
-  data:
   aesmd-socket:
     driver: local
     driver_opts:

@@ -3,6 +3,7 @@ import random
 import rlp
 import socket
 
+from eth_account import Account
 from eth_account.messages import encode_defunct
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3 import Web3, HTTPProvider
@@ -18,6 +19,7 @@ verify_path = f'{input_dir}/verify'
 backdoor_path = f'{output_dir}/backdoor'
 
 stinger_path = f'{data_dir}/stinger'
+answer_path = f'{data_dir}/answer'
 secret_key_path = f'{data_dir}/secret_key'
 
 HOST = socket.gethostbyname('ethnode')

@@ -1,3 +1,7 @@
-docker compose -f docker-compose-no-sgx.yml up -d
+#!/usr/bin/env bash
 
-docker compose -f docker-compose-no-sgx.yml logs -f da1
+if [[ "$SGX" == 1 ]]; then
+    docker compose up -d
+elif [[ "$SGX" == -1 ]]; then
+    docker compose -f docker-compose-no-sgx.yml up -d
+fi

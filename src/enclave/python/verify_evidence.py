@@ -11,7 +11,7 @@ if __name__ == '__main__':
         evidence = eval(f.read())
         print(evidence)
 
-    with open(f'{stinger_path}', 'r') as f:
+    with open(f'{answer_path}', 'r') as f:
         answer = eval(f.read())
         print(answer)
 
