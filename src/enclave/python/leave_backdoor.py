@@ -7,6 +7,8 @@ if __name__ == '__main__':
     answer = dict()
     backdoor = ''
 
+    timestamp('leave_backdoor')
+
     with open(f'{stinger_path}', 'r') as f:
         for line in f.readlines():
             elements = re.split(r'\s+|:', line)
@@ -19,3 +21,5 @@ if __name__ == '__main__':
 
     with open(f'{answer_path}', 'w') as f:
         f.write(str(answer))
+
+    timestamp('leave_backdoor')

@@ -13,7 +13,10 @@ hops = 3
 
 web_replicas = 10
 
-rep = 5
+rep = 100
+
+# benchmark_file = '/private-tor-network/src/benchmark/latency.csv'
+
 
 def query(url):
     """
@@ -51,11 +54,15 @@ def scan(controller, path):
     controller.add_event_listener(attach_stream, stem.control.EventType.STREAM)
 
     try:
+        target_service = f'private-tor-network-web-{sample(web_replicas) + 1}'
+        print(f'target_service {target_service}')
+
+        # with open(benchmark_file, 'a') as f:
+        #     f.write(f"{time.time()}\n")
+
         controller.set_conf('__LeaveStreamsUnattached', '1')  # leave stream management to us
         start_time = time.time()
 
-        target_service = f'private-tor-network-web-{sample(web_replicas) + 1}'
-        print(f'target_service {target_service}')
         check_page = query(f'{target_service}:80')
 
         print(check_page)
@@ -68,6 +75,9 @@ def scan(controller, path):
 
 def trial():
     path = []
+
+    # with open(benchmark_file, 'a') as f:
+    #     f.write(f"{time.time()}\n")
 
     for _ in range(hops - 1):
         path.append(sample_list(relay_fingerprints))
@@ -85,15 +95,40 @@ def trial():
 
 if __name__ == '__main__':
 
+    # with open(benchmark_file, 'a') as f:
+    #     f.write(f"{time.time()}\n")
+
     with stem.control.Controller.from_port(port=9051) as controller:
         controller.authenticate('password')
+
+        # with open(benchmark_file, 'a') as f:
+        #     f.write(f"{time.time()}\n")
+
+        nodes = [(desc.fingerprint, desc.nickname) for desc in controller.get_network_statuses()]
+        # print(nodes)
+
+        # with open(benchmark_file, 'a') as f:
+        #     f.write(f"{time.time()}\n")
 
         cnt = 0
         while cnt < rep:
             print(cnt, rep)
-            exit_fingerprints = [desc.fingerprint for desc in controller.get_network_statuses() if desc.nickname[:4] == 'EXIT']
-            relay_fingerprints = [desc.fingerprint for desc in controller.get_network_statuses() if desc.nickname[:5] == 'RELAY']
+            exit_fingerprints = [desc[0] for desc in nodes if desc[1][:4] == 'EXIT']
+            relay_fingerprints = [desc[0] for desc in nodes if desc[1][:5] == 'RELAY']
+
+            # print(exit_fingerprints)
+            # print(relay_fingerprints)
+
+            # with open(benchmark_file, 'a') as f:
+            #     f.write(f"{time.time()}\n")
 
             trial()
 
+            # with open(benchmark_file, 'a') as f:
+            #     f.write(f"{time.time()}\n")
+
             time.sleep(3)
+
+
+        # with open(benchmark_file, 'a') as f:
+        #     f.write(f"{time.time()}\n")

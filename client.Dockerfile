@@ -58,9 +58,19 @@ RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libssl-dev
 
+RUN apt-get update && apt-get install -y npm
+RUN npm install -g npm@7
+RUN npm install -g truffle@5.4.29
+
 WORKDIR /
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
+
+ADD ./contracts/ /private-tor-network/contracts/
+ADD ./truffle-config.js/ /private-tor-network/truffle-config.js
+WORKDIR /private-tor-network
+RUN rm -rf ./build
+RUN truffle compile
 
 COPY src/tor /src/tor
 

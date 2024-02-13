@@ -43,6 +43,7 @@ fs.mounts = [
 
   { path = "/private-tor-network/data/", uri = "file:/private-tor-network/data/" },
 
+  { path = "/private-tor-network/src/benchmark/", uri = "file:/private-tor-network/src/benchmark/"},
 ]
 
 sys.stack.size = "2M"
@@ -73,8 +74,9 @@ sgx.trusted_files = [
 
   "file:./",
 
-
   "file:/private-tor-network/data/",
+
+  "file:/private-tor-network/src/benchmark/",
 ]
 
 sgx.allowed_files = [
@@ -89,4 +91,6 @@ sgx.allowed_files = [
   "file:/etc/sgx_default_qcnl.conf",
 
   "file:/private-tor-network/data/",
+
+  "file:/private-tor-network/src/benchmark/",
 ]

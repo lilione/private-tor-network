@@ -4,7 +4,7 @@ set -e
 set -x
 
 POADIR=${POADIR:-/opt/poa}
-KEYSTORE=${POA_KEYSTORE:-/opt/poa/keystore/admin}
+KEYSTORE=${POA_KEYSTORE:-/opt/poa/keystore/}
 DATADIR=${POA_DATADIR:-/opt/poa/data}
 
 pkill -f geth || true
@@ -19,7 +19,8 @@ geth --datadir $DATADIR init $POADIR/genesis.json
 geth \
     --datadir $DATADIR \
     --keystore $KEYSTORE \
-    --mine --allow-insecure-unlock --miner.etherbase 8ae054390170797fd871eec47fc77f5666c64d96 \
+    --mine --allow-insecure-unlock --miner.etherbase 123463a4b065722e99115d6c222f267d9cabb524 \
+    --unlock 0x123463a4b065722e99115d6c222f267d9cabb524 \
     --password $POADIR/empty_password.txt \
     --http \
     --http.addr 0.0.0.0 \

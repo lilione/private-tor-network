@@ -12,3 +12,7 @@ src/tor
 data/*
 *OUTPUT
 *.report
+build/
+*.cert
+*contract_address
+*benchmark

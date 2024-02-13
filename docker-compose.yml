@@ -83,6 +83,7 @@ services:
         - ./tor:/tor
         - aesmd-socket:/var/run/aesmd
         - ./:/private-tor-network
+        - ./src/benchmark:/private-tor-network/src/benchmark
         - ./data/enclave:/private-tor-network/data/enclave
         - ./data/input:/private-tor-network/data/input
         - ./data/output:/private-tor-network/data/output
@@ -163,5 +164,3 @@ volumes:
       type: "tmpfs"
       device: "tmpfs"
       o: "rw"
-
-

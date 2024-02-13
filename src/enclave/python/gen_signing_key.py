@@ -8,7 +8,7 @@ def gen_signingKey(w3):
 
     with open(secret_key_path, "wb") as f:
         f.write(bytes(signing_account.privateKey))
-    with open(os.path.join(output_dir, "enclave_address"), "w") as f:
+    with open(enclave_address_path, "w") as f:
         f.write(signing_account.address)
 
     print(f'enclave_addr {signing_account.address}')
